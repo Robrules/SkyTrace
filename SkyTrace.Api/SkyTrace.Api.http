@@ -1,0 +1,6 @@
+@SkyTrace.Api_HostAddress = http://localhost:5057
+
+GET {{SkyTrace.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
