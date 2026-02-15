@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SkyTrace.Api.Domain;
+using SkyTrace.Api.Services;
+using System.Linq;
+
 
 namespace SkyTrace.Api.Controllers;
 
@@ -7,23 +10,19 @@ namespace SkyTrace.Api.Controllers;
 [Route("api/satellites")]
 public class SatellitesController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult Get()
+    private readonly ICelesTrakService _celesTrakService;
+
+    public SatellitesController(ICelesTrakService celesTrakService)
     {
-        var satellites = new[]
-        {
-            new Satellite
-            {
-                Id = Guid.NewGuid(),
-                Name = "ISS",
-                Latitude = -33.86,
-                Longitude = 151.21,
-                AltitudeKm = 420,
-                Timestamp = DateTimeOffset.UtcNow
-            }
-        };
+        this._celesTrakService = celesTrakService;
+    }
+
+
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        var satellites = await _celesTrakService.GetActiveSatellitesAsync();
 
         return Ok(satellites);
-        
     }
 }
