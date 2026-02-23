@@ -9,7 +9,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHttpClient<ICelesTrakService, CelesTraKService>();
+builder.Services.AddHttpClient<IIssTrackingService, IssTrackingService>(client =>
+{
+    client.DefaultRequestHeaders.Add("User-Agent", "SkyTraceApp/1.0 (Contact: your@email.com)");
+});
 
 var app = builder.Build();
 

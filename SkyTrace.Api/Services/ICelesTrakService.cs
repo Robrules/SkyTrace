@@ -2,9 +2,8 @@
 
 namespace SkyTrace.Api.Services
 {
-    public interface ICelesTrakService
+    public interface IIssTrackingService
     {
         Task<IReadOnlyList<Satellite>> GetActiveSatellitesAsync(CancellationToken ct = default);
-
     }
 }

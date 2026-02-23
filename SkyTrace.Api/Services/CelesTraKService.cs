@@ -1,32 +1,39 @@
-﻿using SkyTrace.Api.Domain;
-using System.Net.Http.Json;
-using static System.Net.WebRequestMethods;
+﻿using System.Net.Http.Json;
+using SkyTrace.Api.Domain;
 
 namespace SkyTrace.Api.Services
 {
-    public class CelesTraKService : ICelesTrakService
+    public class IssTrackingService : IIssTrackingService
     {
         private readonly HttpClient http;
-        private const string ActiveSatellitesUrl =
-        "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=json";
+        // 25544 is the NORAD catalog ID for the ISS
+        private const string IssUrl = "https://api.wheretheiss.at/v1/satellites/25544";
 
-        public CelesTraKService(HttpClient http) => this.http = http;
+        public IssTrackingService(HttpClient http) => this.http = http;
+
         public async Task<IReadOnlyList<Satellite>> GetActiveSatellitesAsync(CancellationToken ct = default)
         {
-            // CelesTrak returns GP element sets in JSON; map to domain model
-            var elements = await http.GetFromJsonAsync<List<GpElement>>(ActiveSatellitesUrl, ct)
-                           ?? new List<GpElement>();
+            // Fetch live ISS data
+            var issData = await http.GetFromJsonAsync<IssResponse>(IssUrl, ct);
 
-            return elements.Select(e => new Satellite
+            if (issData == null) return new List<Satellite>();
+
+            return new List<Satellite>
             {
-                Id = Guid.NewGuid(),
-                Name = e.OBJECT_NAME,
-                Latitude = 0,   // TODO:
-                Longitude = 0,   // TODO:
-                AltitudeKm = 0,  // TODO:
-                Timestamp = DateTimeOffset.UtcNow
-            }).ToList();
+                new Satellite
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "ISS",
+                    Latitude = issData.latitude,
+                    Longitude = issData.longitude,
+                    AltitudeKm = issData.altitude,
+                    // The API returns a Unix timestamp (seconds since Jan 1, 1970)
+                    Timestamp = DateTimeOffset.FromUnixTimeSeconds(issData.timestamp)
+                }
+            };
         }
-        private sealed record GpElement(string OBJECT_NAME, string TLE_LINE1, string TLE_LINE2);
+
+        // Record to match the JSON response from the API
+        private sealed record IssResponse(double latitude, double longitude, double altitude, long timestamp);
     }
 }

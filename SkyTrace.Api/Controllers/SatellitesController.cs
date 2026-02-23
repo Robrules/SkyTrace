@@ -10,18 +10,18 @@ namespace SkyTrace.Api.Controllers;
 [Route("api/satellites")]
 public class SatellitesController : ControllerBase
 {
-    private readonly ICelesTrakService _celesTrakService;
+    private readonly IIssTrackingService _issTrackingService;
 
-    public SatellitesController(ICelesTrakService celesTrakService)
+    public SatellitesController(IIssTrackingService issTrackingService)
     {
-        this._celesTrakService = celesTrakService;
+        this._issTrackingService = issTrackingService;
     }
 
 
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        var satellites = await _celesTrakService.GetActiveSatellitesAsync();
+        var satellites = await _issTrackingService.GetActiveSatellitesAsync();
 
         return Ok(satellites);
     }
